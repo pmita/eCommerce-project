@@ -61,7 +61,13 @@ class UI{
 
 //local storage class
 class Storage{
-
+    /*
+        Static methods are called directly on the class 
+        without creating an instance/object of the class. 
+    */
+    static saveProducts(products){
+        localStorage.setItem('products', JSON.stringify(products)); //Create products object on local storage
+    }
 }
 
 /*--------------Event Listeners----------*/
@@ -73,5 +79,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     products.getProducts()
      .then( (products) =>{
          ui.displayProducts(products);
+         Storage.saveProducts(products);
     });
 });
