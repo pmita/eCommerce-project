@@ -63,8 +63,7 @@ class UI{
     getBagButtons(){
         const buttons = [...document.querySelectorAll('.bag-btn')]; //Grab all product Add to bag buttons
         buttonsDOM = buttons;
-        console.log(buttons);
-        buttons.forEach( button =>{
+        buttons.forEach(button =>{
             let id = button.dataset.id;
             let inCart = cart.find(item=> { item.id === id});
             if(inCart){
@@ -73,13 +72,12 @@ class UI{
             } 
 
             button.addEventListener('click', (event)=>{
-                    console.log(event.target);
                     event.target.innerText = 'In Cart';
                     event.target.disabled = true;
 
-                    //Later get product from products based on the id of the button
-                    let cartItem = {...Storage.getProduct(id),
-                    amount: 1};
+                    //Later get product from products based on the id of the button-0. 
+                    let cartItem = {...Storage.getProduct(id), amount: 1};
+                    console.log(cartItem);
                     //add product to cart
                     cart = [...cart, cartItem];
                     //save cart to local storage
@@ -87,25 +85,51 @@ class UI{
                     //set cart values
                     this.setCartValues(cart);
                     //display cart item
+                    this.addCartItem(cartItem);
                     //show the cart
-                });
+                    this.showCart();
+            });
         });
     }
 
     setCartValues(cart){
         let tempTotal = 0;
-        let itemsTotal = 0; 
-        cart.map(item=>{
-            tempTotal +=item.price * item.amount;
+        let itemsTotal = 0;
+
+        cart.map(item =>{
+            tempTotal += item.price * item.amount;
             itemsTotal += item.amount;
         });
 
-        cartTotal.innerText = tempTotal;
+        cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
         cartItems.innerText = itemsTotal;
 
         console.log(cartTotal, cartItems);
+    }
 
-        //Bug that needs fixing
+    addCartItem(item){
+        const div = document.createElement('div');
+        div.classList.add('cart-item');
+        div.innerHTML = `
+            <img src=${item.image} alt="product"/>
+                <div>
+                    <h4>${item.title}</h4>
+                    <h5>$${item.price}</h5>
+                    <span class="remove-item" data-id=${item.id}>remove</span>
+                </div>
+                <div>
+                    <i class="fas fa-chevron-up" data-id=${item.id}></i>
+                    <p class="item-amount">${item.amount}</p>
+                    <i class="fas fa-chevron-down" data-id=${item.id}></i>
+                </div>
+        `;
+        cartContent.appendChild(div);
+    }
+
+    showCart(){
+        cartOverlay.classList.add('transparentBcg');
+        cartDom.classList.add('showCart');
+
     }
 }
 
@@ -119,8 +143,8 @@ class Storage{
         localStorage.setItem('products', JSON.stringify(products)); //Create products object on local storage
     }
     static getProduct(id){
-        let products = JSON.parse(localStorage.getItem('products'));
-        return products.find(product=> {product.id === id})
+        let products = JSON.parse(localStorage.getItem("products"));
+        return products.find(product=> product.id === id);
     }
     static saveCart(cart){
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -133,12 +157,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const products = new Products();
 
     //Get all products
-    products.getProducts()
-     .then( (products) =>{
+    products
+    .getProducts()
+     .then((products) =>{
          ui.displayProducts(products);
          Storage.saveProducts(products);
     })
-     .then( ()=>{
+     .then(()=>{
          ui.getBagButtons();
      });
 });
